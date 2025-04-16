@@ -1,0 +1,9 @@
+--2025-04-16 11:44:29--  https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-linux-amd64.zipsdfwrgfg
+Resolvendo bin.equinox.io (bin.equinox.io)... 35.71.179.82, 75.2.60.68, 99.83.220.108, ...
+Conectando-se a bin.equinox.io (bin.equinox.io)|35.71.179.82|:443... conectado.
+A requisição HTTP foi enviada, aguardando resposta... 404 Not Found
+2025-04-16 11:49:24 ERRO 404: Not Found.
+
+--2025-04-16 11:49:24--  http://rgfgfgfgfgggggggggggggggggg/
+Resolvendo rgfgfgfgfgggggggggggggggggg (rgfgfgfgfgggggggggggggggggg)... falha: Falha temporário na resolução de nome.
+wget: não foi possível resolver endereço de máquina ‘rgfgfgfgfgggggggggggggggggg’
