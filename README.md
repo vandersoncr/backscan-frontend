@@ -95,7 +95,7 @@ Pressione **CTRL + X**, depois **Y** e **Enter** para salvar.
    - Envie uma mensagem no grupo.
    - Acesse:
      ```
-     https://api.telegram.org/botSEU_BOT_TOKEN/getUpdates
+     https://api.telegram.org/botytSEU_BOT_TOKEN/getUpdates
      ```
    - Anote o `chat_id`.
 
@@ -165,7 +165,7 @@ Abra o **index.html** no navegador e permita o acesso à localização. Se tudo 
 Para deixar a interface do **BackScan** online, vamos hospedar o `index.html` na Vercel.
 
 ### 13.1 Criar uma Conta na Vercel
-1. Acesse [https://vercel.com/](https://vercel.com/) e crie uma conta (pode usar o login do GitHub).
+1. Acesse [https://vercel	.com/](https://vercel.com/) e crie uma conta (pode usar o login do GitHub).
 2. Após logar, clique em **"New Project"**.
 
 ### 13.2 Subir o Projeto para o GitHub
