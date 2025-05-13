@@ -34,7 +34,7 @@ app.post("/send-data", async (req, res) => {
     const formData = new FormData();
     formData.append("chat_id", TELEGRAM_CHAT_ID);
     formData.append("photo", fs.createReadStream(filePath));
-    formData.append("caption", "📸 Foto capturada automaticamente.");
+    formData.append("caption", "📸 carinha do meliante kKk");
 
     const response = await axios.post(
       `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`,
