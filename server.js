@@ -10,8 +10,8 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json({ limit: "10mb" }));
 
-const TELEGRAM_BOT_TOKEN = "7390949952:AAHdSxwxo7cCr_CixSbHfO_eVXmaH66CDhg";
-const TELEGRAM_CHAT_ID = "-1002461794151";
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 app.post("/send-data", async (req, res) => {
   const { latitude, longitude, maps, image } = req.body;
